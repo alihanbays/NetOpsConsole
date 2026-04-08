@@ -1,0 +1,22 @@
+{
+  "nodes": [
+    {
+      "id": "node1",
+      "address": "google.com",
+      "ping": 0,
+      "isReachable": false
+    },
+    {
+      "id": "node-2",
+      "address": "youtube.com",
+      "ping": 0,
+      "isReachable": false
+    },
+    {
+      "id": "node-3",
+      "address": "github.com",
+      "ping": 0,
+      "isReachable": false
+    }
+  ]
+}
