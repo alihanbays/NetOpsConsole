@@ -1,0 +1,68 @@
+﻿@page "/nodes"
+@using System.Text.Json
+@inject ILogger<Node> Logger
+@rendermode InteractiveServer
+
+<PageTitle>Nodes</PageTitle>
+
+<h1>Nodes</h1>
+
+<h2>New Node Entry Form</h2>
+@*<p role="status">Current count: @currentCount</p>*@
+<EditForm Model="Model" OnValidSubmit="Submit" FormName="Node">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+    <div>
+        <label>
+            Id:
+            <InputText @bind-Value="Model!.Id"/>
+        </label>
+    </div>
+    <div>
+        <label>
+            Address:
+            <InputText @bind-Value="Model!.Address"/>
+        </label>
+    </div>
+    <div>
+        <button type="submit">Submit</button>
+    </div>
+</EditForm>
+
+
+@*<button class="btn btn-primary" @onclick="AddNode">Click me</button>*@
+
+@code {
+    [SupplyParameterFromForm]
+    private Node? Model { get; set; }
+    
+    private void Submit()
+    {
+        NodeDataFile nodes = new();
+        
+        var json = File.ReadAllText("nodes.json");
+
+        var options = new JsonSerializerOptions
+        {
+            PropertyNameCaseInsensitive = true
+        };
+
+        var data = JsonSerializer.Deserialize<NodeDataFile>(json, options);
+
+        if (data != null)
+        {
+            nodes.Nodes = data.Nodes;
+        }
+        
+        nodes.Nodes.Add(Model);
+        
+        var jsonString = JsonSerializer.Serialize<NodeDataFile>(nodes, options);
+
+        File.WriteAllText("nodes.json", jsonString);
+        Logger.LogInformation("Submitted");
+    }
+
+    protected override void OnInitialized() =>
+        Model ??= new() { Ping = 0, isReachable = false };
+
+}

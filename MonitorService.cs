@@ -1,12 +1,14 @@
 using Microsoft.Extensions.Hosting;
 using System.Text.Json;
 using System.Net.NetworkInformation;
+using System.Timers;
 
 namespace NetOpsConsole;
 
 public class MonitorService(IHostApplicationLifetime hostApplicationLifetime) : IHostedService
 {
     public List<Node> nodes;
+    private static System.Timers.Timer aTimer;
     
     public Task StartAsync(CancellationToken cancellationToken)
     {
@@ -48,8 +50,17 @@ public class MonitorService(IHostApplicationLifetime hostApplicationLifetime) : 
         }
     }
 
-    public void PingNodes()
+    private void SetTimer()
     {
+        aTimer = new(5000);
+        aTimer.Elapsed += PingNodes;
+        aTimer.AutoReset = true;
+        aTimer.Enabled = true;
+    }
+    private void PingNodes(Object source, ElapsedEventArgs e)
+    {
+        Console.WriteLine("The Elapsed event was raised at {0:HH:mm:ss.fff}",
+            e.SignalTime);
         using var ping = new Ping();
         foreach (var node in nodes)
         {
@@ -76,10 +87,11 @@ public class MonitorService(IHostApplicationLifetime hostApplicationLifetime) : 
     }
     private void OnStarted()
     {
-        Console.WriteLine("I feel ALIVE!");
+        SetTimer();
+        Console.WriteLine("The application started at {0:HH:mm:ss.fff}", DateTime.Now);
         // Read from json to see what we have currently as a node
         ConstructNodes();
-        PingNodes();
+
     }
 
     private void OnStopping()
